@@ -1,12 +1,14 @@
-function CREATEGRAPH() {
+var logId = 0;
+
+function CREATEGRAPH(chartId, graphLabel, dataTable) {
     // Create a new Chart instance
-    var ctx = document.getElementById('myChart').getContext('2d');
+    var ctx = document.getElementById(chartId).getContext('2d');
     var myChart = new Chart(ctx, {
-        type: 'bar',
+        type: 'line',
         data: {
             labels: [],
             datasets: [{
-                label: 'Sample Data',
+                label: graphLabel,
                 data: [],
                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
                 borderColor: 'rgba(75, 192, 192, 1)',
@@ -29,13 +31,14 @@ function CREATEGRAPH() {
             type: 'GET',
             dataType: 'json',
             success: function(data) {
-            chartData = data
-                    myChart.data.labels.push(chartData.Velocity[0].time);
-                    myChart.data.datasets[0].data.push(chartData.Velocity[0].sensor_value);
-                
-
-                // Update the chart
-                myChart.update();
+                var chartData = data.Velocity[logId];
+                if (chartData && chartData.time !== myChart.data.labels[logId]) {
+                    myChart.data.labels.push(chartData.time);
+                    myChart.data.datasets[0].data.push(chartData.sensor_value);
+                    // Update the chart
+                    myChart.update();
+                    logId++;
+                }
             },
             error: function(xhr, status, error) {
                 console.error('Error fetching data:', error);
