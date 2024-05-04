@@ -1,6 +1,7 @@
+
 var logId = 0;
 
-function CREATEGRAPH(chartId, graphLabel, dataTable) {
+function CREATEGRAPH(chartId, graphLabel, dataTable,) {
     // Create a new Chart instance
     var ctx = document.getElementById(chartId).getContext('2d');
     var myChart = new Chart(ctx, {
@@ -25,28 +26,56 @@ function CREATEGRAPH(chartId, graphLabel, dataTable) {
     });
 
     // Function to fetch data from the server
-    var fetchData = function() {
+    // possible issues with function arguements fix later
+    var getdata = function() {
         $.ajax({
             url: 'connection.php',
             type: 'GET',
             dataType: 'json',
             success: function(data) {
-                var chartData = data.Velocity[logId];
-                if (chartData && chartData.time !== myChart.data.labels[logId]) {
+            chartData = data.Velocity[logId]
+            if (chartData.time !== myChart.data.labels[logId]) {
                     myChart.data.labels.push(chartData.time);
-                    myChart.data.datasets[0].data.push(chartData.sensor_value);
-                    // Update the chart
-                    myChart.update();
-                    logId++;
-                }
+                    myChart.data.datasets[logId].data.push(chartData.sensor_value);
+                     // Update the chart
+                 myChart.update();
+                logId++;
+        }
+        
+        else{
+        
+        }
+        
+               
             },
             error: function(xhr, status, error) {
                 console.error('Error fetching data:', error);
             }
         });
-    };
-
-    // Initial fetch and update every 2 seconds
-    fetchData();
-    setInterval(fetchData, 2000);
+    }(dataTable);
 }
+    // Initial fetch and update every 2 seconds
+    getdata();
+    
+    
+    setInterval(getdata, 2000);
+
+    function downloadCSV() {
+        // Make AJAX request to download.php
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'download.php', true);
+        xhr.responseType = 'blob'; // Response type as blob (binary data)
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                // Create a temporary link to the file
+                var url = window.URL.createObjectURL(xhr.response);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = 'data.csv'; // File name
+                document.body.appendChild(a);
+                a.click(); // Trigger click event to download
+                window.URL.revokeObjectURL(url); // Release the object URL
+            }
+        };
+        xhr.send();
+      }
