@@ -1,8 +1,8 @@
-
 var logId = 0;
 
-function CREATEGRAPH(chartId, graphLabel, dataTable,) {
+function CREATEGRAPH(chartId, graphLabel) {
     // Create a new Chart instance
+
     var ctx = document.getElementById(chartId).getContext('2d');
     var myChart = new Chart(ctx, {
         type: 'line',
@@ -26,56 +26,90 @@ function CREATEGRAPH(chartId, graphLabel, dataTable,) {
     });
 
     // Function to fetch data from the server
-    // possible issues with function arguements fix later
-    var getdata = function() {
+    function getdata(dataTable) {
         $.ajax({
             url: 'connection.php',
             type: 'GET',
             dataType: 'json',
             success: function(data) {
-            chartData = data.Velocity[logId]
-            if (chartData.time !== myChart.data.labels[logId]) {
-                    myChart.data.labels.push(chartData.time);
-                    myChart.data.datasets[logId].data.push(chartData.sensor_value);
-                     // Update the chart
-                 myChart.update();
-                logId++;
-        }
-        
-        else{
-        
-        }
-        
-               
+            console.log(data['Throttle_Position'][5]);
+                var chartData = data['Throttle_Position'][logId];
+            console.log(chartData.sensor_value);
+                
+                    myChart.data.labels.push(logId);
+                    myChart.data.datasets[0].data.push(chartData.sensor_value);
+                    // Update the chart
+                    myChart.update();
+                    logId++;
+			              
+                
             },
             error: function(xhr, status, error) {
                 console.error('Error fetching data:', error);
             }
         });
-    }(dataTable);
-}
-    // Initial fetch and update every 2 seconds
-    getdata();
-    
-    
-    setInterval(getdata, 2000);
+    }
 
-    function downloadCSV() {
-        // Make AJAX request to download.php
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'download.php', true);
-        xhr.responseType = 'blob'; // Response type as blob (binary data)
-        xhr.onload = function() {
-            if (xhr.status === 200) {
-                // Create a temporary link to the file
-                var url = window.URL.createObjectURL(xhr.response);
-                var a = document.createElement('a');
-                a.href = url;
-                a.download = 'data.csv'; // File name
-                document.body.appendChild(a);
-                a.click(); // Trigger click event to download
-                window.URL.revokeObjectURL(url); // Release the object URL
-            }
-        };
-        xhr.send();
-      }
+    // Initial fetch and update every 2 seconds
+    getdata("Battery_life");
+    setInterval(function() {
+        getdata("Battery_Life");
+    }, 1000);
+
+}
+
+function downloadFileFromServer() {
+    // URL of the PHP file that serves the file for download
+    var phpFileUrl = 'download2.php';
+
+    // AJAX request to download the file
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', phpFileUrl, true);
+    xhr.responseType = 'blob';
+
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            // Create a temporary anchor element
+            var downloadLink = document.createElement('a');
+            downloadLink.href = window.URL.createObjectURL(xhr.response);
+            downloadLink.download = 'test.csv'; // Specify the default filename for download
+            downloadLink.style.display = 'none';
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        }
+    };
+
+    xhr.send();
+}
+
+function downloadCSV() {
+    // Make AJAX request to download.php
+    $.ajax({
+        url: 'download.php',
+        method: 'GET',
+        xhrFields: {
+            responseType: 'blob' // Set the response type to blob (binary data)
+        },
+        success: function(data) {
+            // Create a temporary URL to the blob data
+            var url = window.URL.createObjectURL(data);
+
+            // Create a temporary link element
+            var a = $('<a>', {
+                href: url,
+                download: 'data.csv' // File name
+            }).appendTo('body');
+
+            // Trigger click event to download
+            a[0].click();
+
+            // Clean up - remove the temporary link and release the object URL
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        },
+        error: function(xhr, status, error) {
+            console.error('Error downloading CSV:', error);
+        }
+    });
+}
