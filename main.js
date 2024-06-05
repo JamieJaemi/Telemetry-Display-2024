@@ -1,29 +1,45 @@
-var logId = 0;
-
 function CREATEGRAPH(chartId, graphLabel) {
-    // Create a new Chart instance
-
-    var ctx = document.getElementById(chartId).getContext('2d');
-    var myChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: [],
-            datasets: [{
-                label: graphLabel,
-                data: [],
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
+  // Create a new Chart instance
+  var    temp = graphLabel;
+  console.log(temp);
+  var ctx = document.getElementById(chartId).getContext('2d');
+  var myChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+          labels: [],
+          datasets: [{
+              label: graphLabel,
+              data: [],
+              backgroundColor: 'rgba(75, 192, 192, 0.2)',
+              borderColor: 'rgba(75, 192, 192, 1)',
+              borderWidth: 1
+          }]
+      },
+      options: {
+          animation: {
+            duration: 0
+          },
+          scales: {
+              y: {
+                  beginAtZero: true
+              }
+          },
+              plugins: {
+                  zoom: {
+                    pan:{
+                      enabled: true,
+                      
+                    },
+                    zoom: {
+                      wheel: {
+                        enabled: true,
+                      },
+                      mode: 'x',
+                    }
+                  }
                 }
-            }
-        }
-    });
+              }
+          });
 
     // Function to fetch data from the server
     function getdata(dataTable) {
@@ -32,17 +48,19 @@ function CREATEGRAPH(chartId, graphLabel) {
             type: 'GET',
             dataType: 'json',
             success: function(data) {
-            console.log(data['Throttle_Position'][5]);
-                var chartData = data['Throttle_Position'][logId];
-            console.log(chartData.sensor_value);
-                
-                    myChart.data.labels.push(logId);
-                    myChart.data.datasets[0].data.push(chartData.sensor_value);
-                    // Update the chart
-                    myChart.update();
-                    logId++;
-			              
-                
+            var currentPos = myChart.data.datasets[0].data.length;
+            var potentialPos = data[dataTable].length;
+            
+      	    if(currentPos < potentialPos){
+       		    var chartData = data[dataTable][currentPos];
+                          myChart.data.labels.push(currentPos);
+                          myChart.data.datasets[0].data.push(chartData.sensor_value);
+      		   myChart.update();
+               }
+                    
+                    
+			   
+   
             },
             error: function(xhr, status, error) {
                 console.error('Error fetching data:', error);
@@ -51,10 +69,10 @@ function CREATEGRAPH(chartId, graphLabel) {
     }
 
     // Initial fetch and update every 2 seconds
-    getdata("Battery_life");
+    getdata(temp);
     setInterval(function() {
-        getdata("Battery_Life");
-    }, 1000);
+        getdata(temp);
+    }, 400);
 
 }
 
