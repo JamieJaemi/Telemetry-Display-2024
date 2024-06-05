@@ -4,9 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Telemetry</title>
-    <link rel="stylesheet" href="chart.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+   
+
+    <script type="module" src="./node_modules/chart.js/dist/chart.umd.js"></script>
+    <script type="module" src="./node_modules/jquery/dist/jquery.js"></script>
+    <script type="module" src="./node_modules/chartjs-plugin-zoom/dist/chartjs-plugin-zoom.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+
+
+   
     
 </head>
 <body>
@@ -19,18 +25,28 @@
         </button>
         <div class="dropdown-content">
 
-            <a href="javascript:CREATEGRAPH()">graph</a>
-            <a href="">update</a>
-            <a href="">download file</a>
+            <a href="javascript:CREATEGRAPH('myChart1', 'Speed')">Speed</a>
+            <a href="javascript:CREATEGRAPH('myChart2', 'Battery_Life')">Battery Life</a>
+	          <a href="javascript:CREATEGRAPH('myChart3', 'Brake_Position')">Brake Position</a>
+            <a href="javascript:CREATEGRAPH('myChart4', 'Throttle_Position')">Throttle Position</a>
+                     
+                     
+                     
+            <a href="javascript:downloadFileFromServer()">Download</a>
+            
 
         </div>
     </div>
     
     <div class="container">   
         
-            <canvas id="myChart"  width="400" height="400"></canvas>     
-       
+
+            <canvas id="myChart1"  ></canvas>     
+            <canvas id="myChart2" ></canvas>
+            <canvas id="myChart3"  ></canvas>     
+            <canvas id="myChart4" ></canvas>
     </div>
 <script src="main.js" defer></script>
+
 </body>
 </html>
